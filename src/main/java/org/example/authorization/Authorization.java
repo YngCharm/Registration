@@ -15,9 +15,10 @@ public class Authorization {
 
     public void addingCustomer() {
         customer.put("Sasha2875", "Alex2003");
+        customer.put("VladKing", "123");
     }
 
-    public void entering() {
+    public void entering() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1 - Авторизация" + "\n" + "2 - Регистрация");
         String enter = scanner.nextLine();
@@ -27,39 +28,52 @@ public class Authorization {
         }
     }
 
-    public void authorizing() {
+
+
+    public  void searchingInFile() {
         addingCustomer();
+        try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_PATH))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                int symbolIndex = line.indexOf(':');
+
+                if (symbolIndex != -1) {
+                    // Чтение слова до символа ":"
+                    String beforeSymbol = line.substring(0, symbolIndex);
+                    System.out.println("Логин " + beforeSymbol);
+
+
+                    // Чтение слова после символа ":"
+                    String afterSymbol = line.substring(symbolIndex + 1);
+                    System.out.println("Пароль " + afterSymbol);
+                    customer.put(beforeSymbol, afterSymbol);
+
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void authorizing() throws IOException {
+        addingCustomer();
+        searchingInFile();
+        System.out.println(customer);
+        BufferedReader br = new BufferedReader(new FileReader(DATABASE_PATH));
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите логин: ");
         String login = scanner.nextLine();
         System.out.println("Введите пароль: ");
         String password = scanner.nextLine();
 
-        if (customer.containsKey(login) && (customer.containsValue(password))
-                || login.equals(beforeSymbol) && password.equals(afterSymbol)) {
-            System.out.println("Вход успешный");
-        }
-        else authorizing();
-    }
-   public static String beforeSymbol;
-    public static String afterSymbol;
-    public static void searchingInFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_PATH))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                int symbolIndex = line.indexOf(':');
-                if (symbolIndex != -1) {
-                    // Чтение слова до символа ":"
-                     beforeSymbol = line.substring(0, symbolIndex);
-                    System.out.println("Логин " + beforeSymbol);
+        while (br.readLine() != null) {
 
-                    // Чтение слова после символа ":"
-                     afterSymbol = line.substring(symbolIndex + 1);
-                    System.out.println("Пароль " + afterSymbol);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (customer.containsKey(login) && (customer.containsValue(password))) {
+                entering();
+            } else authorizing();
+
         }
+        System.out.println("Вход успешный");
     }
 }
